@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:math_expressions/math_expressions.dart'; // Importando a biblioteca
+import 'package:math_expressions/math_expressions.dart';
 
 void main() {
   runApp(CalculadoraApp());
@@ -25,21 +25,17 @@ class CalculadoraPage extends StatefulWidget {
 }
 
 class _CalculadoraPageState extends State<CalculadoraPage> {
-  String _output = "0"; // Resultado da expressão
-  String _expression = ""; // Expressão sendo digitada
+  String _output = "0";
+  String _expression = "";
 
-  // Função que processa os botões
   void _onButtonPressed(String value) {
     setState(() {
       if (value == "=") {
-        // Avaliar a expressão matemática
         _evaluateExpression();
       } else if (value == "C") {
-        // Limpar a expressão
         _expression = "";
         _output = "0";
       } else if (value == "DEL") {
-        // Apagar o último caractere
         if (_expression.isNotEmpty) {
           _expression = _expression.substring(0, _expression.length - 1);
         }
@@ -51,13 +47,9 @@ class _CalculadoraPageState extends State<CalculadoraPage> {
 
   void _evaluateExpression() {
     try {
-      // Criar um analisador para a expressão
       Parser p = Parser();
       Expression exp = p.parse(_expression);
-      
-      // Avaliar a expressão e obter o resultado
       double result = exp.evaluate(EvaluationType.REAL, ContextModel());
-      
       setState(() {
         _output = result.toString();
       });
@@ -68,21 +60,24 @@ class _CalculadoraPageState extends State<CalculadoraPage> {
     }
   }
 
-  // Função para gerar os botões
   Widget _buildButton(String label, {Color color = Colors.grey}) {
-    return ElevatedButton(
-      onPressed: () => _onButtonPressed(label),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: color, // Cor do botão
-        fixedSize: Size(80, 80), // Tamanho fixo do botão
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(40), // Botões arredondados
+    return Expanded(
+      child: Padding(
+        padding: const EdgeInsets.all(4.0), // Ajuste o padding entre os botões
+        child: ElevatedButton(
+          onPressed: () => _onButtonPressed(label),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: color,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(40),
+            ),
+            padding: EdgeInsets.zero,
+          ),
+          child: Text(
+            label,
+            style: TextStyle(fontSize: 32, color: Colors.white),
+          ),
         ),
-        padding: EdgeInsets.zero,
-      ),
-      child: Text(
-        label,
-        style: TextStyle(fontSize: 32, color: Colors.white),
       ),
     );
   }
@@ -119,46 +114,41 @@ class _CalculadoraPageState extends State<CalculadoraPage> {
             Column(
               children: [
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    _buildButton("C", color: Colors.red), // Limpar
-                    _buildButton("DEL", color: Colors.grey), // Apagar
-                    _buildButton("/", color: Colors.orange), // Divisão
-                    _buildButton("*", color: Colors.orange), // Multiplicação
+                    _buildButton("C", color: Colors.red),
+                    _buildButton("DEL", color: Colors.grey),
+                    _buildButton("/", color: Colors.orange),
+                    _buildButton("*", color: Colors.orange),
                   ],
                 ),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     _buildButton("7"),
                     _buildButton("8"),
                     _buildButton("9"),
-                    _buildButton("-", color: Colors.orange), // Subtração
+                    _buildButton("-", color: Colors.orange),
                   ],
                 ),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     _buildButton("4"),
                     _buildButton("5"),
                     _buildButton("6"),
-                    _buildButton("+", color: Colors.orange), // Soma
+                    _buildButton("+", color: Colors.orange),
                   ],
                 ),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     _buildButton("1"),
                     _buildButton("2"),
                     _buildButton("3"),
-                    _buildButton("=", color: Colors.green), // Resultado
+                    _buildButton("=", color: Colors.green),
                   ],
                 ),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     _buildButton("0"),
-                    _buildButton(".", color: Colors.grey), // Ponto
+                    _buildButton(".", color: Colors.grey),
                   ],
                 ),
               ],
