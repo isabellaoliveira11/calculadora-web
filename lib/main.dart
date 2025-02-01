@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:math_expressions/math_expressions.dart';
+import 'dart:math';
 
 void main() {
   runApp(CalculadoraApp());
@@ -31,6 +32,10 @@ class _CalculadoraPageState extends State<CalculadoraPage> {
   void _onButtonPressed(String value) {
     setState(() {
       if (value == "=") {
+        // Se o valor for "=" e houver um parêntese aberto sem fechamento, adicionamos o parêntese de fechamento automaticamente
+        if (_expression.contains('(') && !_expression.contains(')')) {
+          _expression += ')';
+        }
         _evaluateExpression();
       } else if (value == "C") {
         _expression = "";
@@ -39,6 +44,15 @@ class _CalculadoraPageState extends State<CalculadoraPage> {
         if (_expression.isNotEmpty) {
           _expression = _expression.substring(0, _expression.length - 1);
         }
+      } else if (value == "sin" || value == "cos" || value == "tan") {
+        // Inserir a função trigonométrica com um valor entre parênteses
+        _expression += "$value(";
+      } else if (value == "%") {
+        // Porcentagem
+        _expression += "/100";
+      } else if (value == "√") {
+        // Raiz quadrada
+        _expression += "sqrt(";
       } else {
         _expression += value;
       }
@@ -47,11 +61,22 @@ class _CalculadoraPageState extends State<CalculadoraPage> {
 
   void _evaluateExpression() {
     try {
+      // Substituindo a função de raiz quadrada por sqrt
+      _expression = _expression.replaceAll("√", "sqrt");
+
+      // Substituindo as funções trigonométricas com a conversão de graus para radianos (multiplicando por pi / 180)
+      _expression = _expression.replaceAllMapped(RegExp(r"(sin|cos|tan)\((\d+\.?\d*)\)"), (match) {
+        String func = match.group(1)!;
+        String number = match.group(2)!;
+        double radians = double.parse(number) * (pi / 180); // Converter para radianos
+        return "$func($radians)";
+      });
+
       Parser p = Parser();
       Expression exp = p.parse(_expression);
       double result = exp.evaluate(EvaluationType.REAL, ContextModel());
       setState(() {
-        _output = result.toString();
+        _output = result.toStringAsFixed(2); // Limitar a 2 casas decimais
       });
     } catch (e) {
       setState(() {
@@ -63,7 +88,7 @@ class _CalculadoraPageState extends State<CalculadoraPage> {
   Widget _buildButton(String label, {Color color = Colors.grey}) {
     return Expanded(
       child: Padding(
-        padding: const EdgeInsets.all(4.0), // Ajuste o padding entre os botões
+        padding: const EdgeInsets.all(4.0),
         child: ElevatedButton(
           onPressed: () => _onButtonPressed(label),
           style: ElevatedButton.styleFrom(
@@ -93,7 +118,6 @@ class _CalculadoraPageState extends State<CalculadoraPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.end,
           children: <Widget>[
-            // Visor de resultado
             Container(
               alignment: Alignment.centerRight,
               padding: EdgeInsets.symmetric(vertical: 20),
@@ -110,15 +134,14 @@ class _CalculadoraPageState extends State<CalculadoraPage> {
                 style: TextStyle(fontSize: 60, color: Colors.black),
               ),
             ),
-            // Linhas de botões
             Column(
               children: [
                 Row(
                   children: [
                     _buildButton("C", color: Colors.red),
                     _buildButton("DEL", color: Colors.grey),
+                    _buildButton("%", color: Colors.orange),
                     _buildButton("/", color: Colors.orange),
-                    _buildButton("*", color: Colors.orange),
                   ],
                 ),
                 Row(
@@ -126,7 +149,7 @@ class _CalculadoraPageState extends State<CalculadoraPage> {
                     _buildButton("7"),
                     _buildButton("8"),
                     _buildButton("9"),
-                    _buildButton("-", color: Colors.orange),
+                    _buildButton("*", color: Colors.orange),
                   ],
                 ),
                 Row(
@@ -134,7 +157,7 @@ class _CalculadoraPageState extends State<CalculadoraPage> {
                     _buildButton("4"),
                     _buildButton("5"),
                     _buildButton("6"),
-                    _buildButton("+", color: Colors.orange),
+                    _buildButton("-", color: Colors.orange),
                   ],
                 ),
                 Row(
@@ -142,13 +165,26 @@ class _CalculadoraPageState extends State<CalculadoraPage> {
                     _buildButton("1"),
                     _buildButton("2"),
                     _buildButton("3"),
-                    _buildButton("=", color: Colors.green),
+                    _buildButton("+", color: Colors.orange),
                   ],
                 ),
                 Row(
                   children: [
                     _buildButton("0"),
-                    _buildButton(".", color: Colors.grey),
+                    _buildButton("."),
+                    _buildButton("=", color: Colors.green),
+                  ],
+                ),
+                Row(
+                  children: [
+                    _buildButton("sin", color: Colors.blue),
+                    _buildButton("cos", color: Colors.blue),
+                    _buildButton("tan", color: Colors.blue),
+                  ],
+                ),
+                Row(
+                  children: [
+                    _buildButton("√", color: Colors.blue), // Botão de raiz quadrada
                   ],
                 ),
               ],
